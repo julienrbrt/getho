@@ -28,10 +28,14 @@ func main() {
 			log.Fatal(err)
 		}
 
-		balance := ethClient.checkBalance(context.Background(), *address)
+		balance, err := ethClient.checkBalance(context.Background(), *address)
+		if err != nil {
+			log.Printf("uh oh: %s\n", err)
+		}
+
 		if balance > 0 {
 			log.Printf("🎉🎉🎉 address %s has %d balance 🎉🎉🎉", address.Hex(), balance)
-			log.Printf("its private key is %s", mnemonic)
+			log.Printf("its private key is based on this mnemonic: '%s'", mnemonic)
 			os.Exit(0)
 		}
 
@@ -48,16 +52,16 @@ func ConnectEthereumNode(endpoint string) ethClient {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("successfully connected to local ethereum node 🎉")
+	log.Println("successfully connected to ethereum node 🎉")
 
 	return ethClient{client}
 }
 
-func (e *ethClient) checkBalance(ctx context.Context, address common.Address) int64 {
+func (e *ethClient) checkBalance(ctx context.Context, address common.Address) (int64, error) {
 	balance, err := e.client.BalanceAt(ctx, address, nil)
 	if err != nil {
-		log.Fatal(err)
+		return 0, fmt.Errorf("error when checking balance of %s: %w", address.Hex(), err)
 	}
 
-	return balance.Int64()
+	return balance.Int64(), nil
 }
