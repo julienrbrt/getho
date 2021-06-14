@@ -1,6 +1,6 @@
 # Getho
 
-Getho is dumb tool that is going to generate random ethereum address and check their balance.
+Getho is dumb tool that is going to generate random private keys, fetch the associated ethereum address and check its balance.
 Getho stops as soon that it finds an address with a balance greather than 0.
 
 ---
