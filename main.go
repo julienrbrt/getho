@@ -2,23 +2,41 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func main() {
-	// if len(os.Args) > 12 {
-	// 	bip39.SetWordList(os.Args[1:])
-	// }
+var (
+	numberWords int
+)
 
-	ethClient := ConnectEthereumNode("http://127.0.0.1:8545")
+func init() {
+	flag.IntVar(&numberWords, "n", 24, "mnemonic number of words (default 24)")
+	flag.Parse()
+}
+
+func main() {
+	// parse arguments
+	var shortSize bool
+	switch numberWords {
+	case 12:
+		shortSize = true
+	case 24:
+		shortSize = false
+	default:
+		log.Fatalf("%d word mnemonic is not supported: use 12 or 24", numberWords)
+		return
+	}
+
+	ethClient, err := connectETHNode("http://127.0.0.1:8545")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for {
-		mnemonic, err := generateMnemonic()
+		mnemonic, err := generateMnemonic(shortSize)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -36,32 +54,28 @@ func main() {
 		if balance > 0 {
 			log.Printf("🎉🎉🎉 address %s has %d balance 🎉🎉🎉", address.Hex(), balance)
 			log.Printf("its private key is based on this mnemonic: '%s'", mnemonic)
-			os.Exit(0)
+
+			if err := saveResult(address.Hex(), mnemonic, balance); err != nil {
+				os.Exit(0)
+			}
 		}
 
 		fmt.Print(".")
 	}
 }
 
-type ethClient struct {
-	client *ethclient.Client
-}
+func saveResult(address, mnemonic string, balance int64) error {
+	filename := "result.txt"
 
-func ConnectEthereumNode(endpoint string) ethClient {
-	client, err := ethclient.Dial(endpoint)
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed opening %s: %w", filename, err)
 	}
-	log.Println("successfully connected to ethereum node 🎉")
+	defer f.Close()
 
-	return ethClient{client}
-}
-
-func (e *ethClient) checkBalance(ctx context.Context, address common.Address) (int64, error) {
-	balance, err := e.client.BalanceAt(ctx, address, nil)
-	if err != nil {
-		return 0, fmt.Errorf("error when checking balance of %s: %w", address.Hex(), err)
+	if _, err := f.WriteString(fmt.Sprintf("| %s | %d | %s |\n", address, balance, mnemonic)); err != nil {
+		return fmt.Errorf("failed appeding to %s: %w", filename, err)
 	}
 
-	return balance.Int64(), nil
+	return nil
 }
