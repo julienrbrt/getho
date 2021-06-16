@@ -8,17 +8,13 @@ import (
 	"os"
 )
 
-var (
-	numberWords int
-)
-
-func init() {
-	flag.IntVar(&numberWords, "n", 24, "mnemonic number of words (default 24)")
-	flag.Parse()
-}
+var numberWords int
 
 func main() {
 	// parse arguments
+	flag.IntVar(&numberWords, "n", 24, "mnemonic number of words")
+	flag.Parse()
+
 	var shortSize bool
 	switch numberWords {
 	case 12:
@@ -30,6 +26,7 @@ func main() {
 		return
 	}
 
+	// connect to ethereum node
 	ethClient, err := connectETHNode("http://127.0.0.1:8545")
 	if err != nil {
 		log.Fatal(err)
