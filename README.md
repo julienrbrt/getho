@@ -1,7 +1,7 @@
 # Getho
 
 Getho is dumb tool that is going to generate random private keys, fetch the associated ethereum address and check its balance.
-Getho creates a file `result.txt` as soon that it finds an address with a balance greather than 0. If the fine cannot be created, Getho will stop and display the address found.
+Getho creates a file `result.txt` as soon that it finds an address with a balance greather than 0.001 eth. If the fine cannot be created, Getho will stop and display the address found.
 
 ---
 

@@ -48,8 +48,8 @@ func main() {
 			log.Printf("uh oh: %s\n", err)
 		}
 
-		if balance > 0 {
-			log.Printf("🎉🎉🎉 address %s has %d balance 🎉🎉🎉", address.Hex(), balance)
+		if balance > 0.001 {
+			log.Printf("🎉🎉🎉 address %s has %f balance 🎉🎉🎉", address.Hex(), balance)
 			log.Printf("its private key is based on this mnemonic: '%s'", mnemonic)
 
 			if err := saveResult(address.Hex(), mnemonic, balance); err != nil {
@@ -61,7 +61,7 @@ func main() {
 	}
 }
 
-func saveResult(address, mnemonic string, balance int64) error {
+func saveResult(address, mnemonic string, balance float64) error {
 	filename := "result.txt"
 
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -70,7 +70,7 @@ func saveResult(address, mnemonic string, balance int64) error {
 	}
 	defer f.Close()
 
-	if _, err := f.WriteString(fmt.Sprintf("| %s | %d | %s |\n", address, balance, mnemonic)); err != nil {
+	if _, err := f.WriteString(fmt.Sprintf("| %s | %f ETH | %s |\n", address, balance, mnemonic)); err != nil {
 		return fmt.Errorf("failed appeding to %s: %w", filename, err)
 	}
 

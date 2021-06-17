@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -23,11 +24,12 @@ func connectETHNode(endpoint string) (*ethClient, error) {
 	return &ethClient{client}, nil
 }
 
-func (e *ethClient) checkBalance(ctx context.Context, address common.Address) (int64, error) {
+func (e *ethClient) checkBalance(ctx context.Context, address common.Address) (float64, error) {
 	balance, err := e.client.BalanceAt(ctx, address, nil)
 	if err != nil {
 		return 0, fmt.Errorf("error when checking balance of %s: %w", address.Hex(), err)
 	}
 
-	return balance.Int64(), nil
+	// return eth value
+	return float64(balance.Int64()) / math.Pow(10, 18), nil
 }
